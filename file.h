@@ -13,6 +13,12 @@
 extern "C" {
 #endif
 
+typedef struct {
+    char name[128];
+    int  fd;
+    int  suflen;
+} tmpfile_t;
+
 /**
  * Get file length in bytes
  */
@@ -92,15 +98,6 @@ static inline char *get_tmpdir(char *name, int mode, const char *prefix)
     return name;
 }
 
-static inline int get_tmpfile_ex(char *name, int suflen)
-{
-    int fd;
-    if ((fd = mkstemps(name, suflen)) >= 0)
-        chmod(name, 0666);
-
-    return fd;
-}
-
 static inline int get_tmpfile(char *name, int mode, const char *dir, const char *suffix)
 {
     int fd, suflen;
@@ -118,6 +115,21 @@ static inline int get_tmpfile(char *name, int mode, const char *dir, const char 
 
     return fd;
 }
+
+static inline int get_tmpfile_ex(tmpfile_t *tf)
+{
+    if (tf->name[0] == 0) {
+        sprintf(tf->name, "/tmp/XXXXXX.data");
+        tf->suflen = 5;
+    }
+
+    if ((tf->fd = mkstemps(tf->name, tf->suflen)) < 0)
+        return errno;
+
+    chmod(tf->name, 0666);
+    return 0;
+}
+
 
 
 #ifdef __cplusplus
