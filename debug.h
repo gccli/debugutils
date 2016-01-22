@@ -12,35 +12,37 @@
 #define _DEBUG 0
 #endif
 
+#define FMT_R(msg)  "\x1b[31m\x1b[1m" msg "\x1b[0m\n"
+#define FMT_G(msg)  "\x1b[32m\x1b[1m" msg "\x1b[0m\n"
+#define FMT_B(msg)  "\x1b[34m\x1b[1m" msg "\x1b[0m\n"
+#define FMT_Y(msg)  "\x1b[33m\x1b[1m" msg "\x1b[0m\n"
+#define FMT_M(msg)  "\x1b[35m\x1b[1m" msg "\x1b[0m\n"
+#define TCKL        "\033[0G\033[0K"
+
 #if _DEBUG > 0
+#include <assert.h>
 #include <string.h>
 #define __FN__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #define debug_print(msg,...)                                            \
     fprintf(stdout, "%s:%d(%s): "msg,__FN__,__LINE__,__FUNCTION__,##__VA_ARGS__)
+
+#define ASSERT(x)                                                       \
+    if (!(x)) {                                                         \
+        debug_print(FMT_R("FAILED: %s"), #x);                           \
+        exit(1);                                                        \
+    }
 #else
 #define debug_print(msg, ...) ((void)0)
 #endif
 
-#define FMT_RED(msg)    "\x1b[31m\x1b[1m" msg "\x1b[0m"
-#define FMT_GREEN(msg)  "\x1b[32m\x1b[1m" msg "\x1b[0m"
-#define FMT_BLUE(msg)   "\x1b[34m\x1b[1m" msg "\x1b[0m"
-#define FMT_YELLOW(msg) "\x1b[33m\x1b[1m" msg "\x1b[0m"
-#define FMT_MAGE(msg)   "\x1b[35m\x1b[1m" msg "\x1b[0m"
+#define thread_id() syscall(__NR_gettid)
 
-#define FMT_R(msg)  FMT_RED(msg)"\n"
-#define FMT_G(msg)  FMT_GREEN(msg)"\n"
-#define FMT_B(msg)  FMT_BLUE(msg)"\n"
-#define FMT_Y(msg)  FMT_YELLOW(msg)"\n"
-#define FMT_M(msg)  FMT_MAGE(msg)"\n"
 
-// Kill Line, Moves the cursor to Begining Of Line
-#define TCKL          "\033[0G\033[0K"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define thread_id() syscall(__NR_gettid)
 static inline void print_string(void *data, int length)
 {
     int i;
