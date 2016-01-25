@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 #include <sys/syscall.h>
 
@@ -21,19 +22,18 @@
 
 #if _DEBUG > 0
 #include <assert.h>
-#include <string.h>
 #define __FN__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #define debug_print(msg,...)                                            \
     fprintf(stdout, "%s:%d(%s): "msg,__FN__,__LINE__,__FUNCTION__,##__VA_ARGS__)
+#else
+#define debug_print(msg, ...) ((void)0)
+#endif
 
 #define ASSERT(x)                                                       \
     if (!(x)) {                                                         \
         debug_print(FMT_R("FAILED: %s"), #x);                           \
         exit(1);                                                        \
     }
-#else
-#define debug_print(msg, ...) ((void)0)
-#endif
 
 #define thread_id() syscall(__NR_gettid)
 
