@@ -1,9 +1,10 @@
-# Common Utils
-Common utils, used for debug
+Common Utils
+============
 
-# Usage:
+Debug utils, used for fast developing and integrating
 
-git clone git@github.com:gccli/libcommutils.git
+Features
+--------
 
-make && sudo make install
-
+* Use inline functions, not need to library
+* Every file has no dependencies to each other

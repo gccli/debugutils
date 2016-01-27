@@ -3,7 +3,6 @@ libdir=$(prefix)/lib
 
 CFLAGS=-g -Wall -I$(MYLIB) -fPIC
 LDFLAGS=
-ARFLAGS=rv
 
 VPATH=.
 
@@ -14,13 +13,12 @@ OBJS := $(patsubst %.c,%.o, $(OBJS))
 HEADERS := $(patsubst %.cpp,%.h, $(SRCS))
 HEADERS := $(patsubst %.c,%.h, $(HEADERS))
 
-TARGET=libcommutils.a
+TARGET=libcommonutils.so
 all:$(TARGET)
 
 $(TARGET):$(OBJS)
-	@mkdir -p $(@D)
-	@echo -e "\033[32;1m#### Generate target $@ \033[0m"
-	@$(AR) $(ARFLAGS) $@ $^
+	@echo "\033[32;1m#### Generate target $@ \033[0m"
+	$(CC) -o $@ $^ -shared -Wl,-soname,$@ $(LDFLAGS)
 
 %.o:%.cpp
 	$(CXX) $(CFLAGS) -c  $^ -o $@
