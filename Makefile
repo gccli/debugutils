@@ -1,7 +1,7 @@
 prefix=/usr/local
 libdir=$(prefix)/lib
 
-CFLAGS=-g -Wall -I$(MYLIB) -fPIC
+CFLAGS=-g -Wall -fPIC
 LDFLAGS=
 
 VPATH=.
