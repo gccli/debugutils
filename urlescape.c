@@ -124,8 +124,8 @@ int url_unescape(const char *string, size_t length,
 
 #ifdef _TEST
 #include <unistd.h>
-#include "utilfile.h"
-#include "utilsha1.h"
+#include <openssl/sha.h>
+#include "file.h"
 int main(int argc, char *argv[])
 {
     int fd;
