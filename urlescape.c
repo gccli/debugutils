@@ -125,17 +125,36 @@ int url_unescape(const char *string, size_t length,
 #ifdef _TEST
 #include <unistd.h>
 #include <openssl/sha.h>
+#include <json-c/json.h>
 #include "file.h"
 int main(int argc, char *argv[])
 {
     int fd;
     char name[64], *buf, *out = NULL, *verify;
+    char *p1, *p2;
     size_t len, outlen;
+
+    json_tokener *jtok;
+    json_object *jobj;
+    enum json_tokener_error jerr;
+
     buf = get_file_buffer(argv[1], &len);
+
     if (buf) {
         if (argc > 2) {
             if (url_unescape(buf, len, &out, &outlen) == 0) {
                 printf("%.*s\n", (int)outlen, out);
+                p1 = strchr(out, '=');
+                if (p1) {
+                    p1++;
+                    p2 = strchr(p1, '&');
+                    len = p2 - p1;
+                    jtok = json_tokener_new();
+                    do {
+                        jobj = json_tokener_parse_ex(jtok, p1, len);
+                    } while ((jerr = json_tokener_get_error(jtok)) == json_tokener_continue);
+                    printf("Json:\n%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_PRETTY));
+                }
                 if ((verify = url_escape(out, outlen))) {
                     fd = get_tmpfile(name, 0666, NULL, NULL);
                     if (fd > 0) {
