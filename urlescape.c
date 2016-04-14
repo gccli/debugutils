@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include <errno.h>
+#include "utils/urlescape.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,22 +34,32 @@ static int url_isunreserved(unsigned char in)
   return 0;
 }
 
-char *url_escape(const char *string, size_t length)
+
+int url_escape_ex(const char *string, size_t length, escape_string *s)
 {
-    size_t alloc = (length ? length : strlen(string))+1;
     char *ns;
     char *testing_ptr = NULL;
     unsigned char in; /* we need to treat the characters unsigned */
-    size_t newlen = alloc;
+    size_t newlen = length+1;
     size_t strindex=0;
-    size_t len;
 
-    ns = malloc(alloc);
+    if (s->data && s->size > 0) {
+        if (s->size < length) {
+            s->data = realloc(s->data, length+4);
+            s->size = length;
+        }
+    } else {
+        s->data = calloc(1, length+4);
+        s->size = length;
+    }
+
+    ns = s->data;
+
     if(!ns)
-        return NULL;
+        return ENOMEM;
 
-    len = alloc-1;
-    while(len--) {
+    //len = alloc-1;
+    while(length--) {
         in = *string;
 
         if(url_isunreserved(in))
@@ -57,15 +68,16 @@ char *url_escape(const char *string, size_t length)
         else {
             /* encode it */
             newlen += 2; /* the size grows with two, since this'll become a %XX */
-            if(newlen > alloc) {
-                alloc *= 2;
-                testing_ptr = realloc(ns, alloc);
+            if(newlen > s->size) {
+                s->size *= 2;
+                testing_ptr = realloc(s->data, s->size+4);
                 if(!testing_ptr) {
-                    free( ns );
-                    return NULL;
+                    free( s->data ); s->data = NULL;
+                    return ENOMEM;
                 }
                 else {
-                    ns = testing_ptr;
+                    s->data = testing_ptr;
+                    ns = s->data;
                 }
             }
 
@@ -75,17 +87,33 @@ char *url_escape(const char *string, size_t length)
         string++;
     }
     ns[strindex]=0; /* terminate it */
-    return ns;
+    s->len = strindex;
+
+    return 0;
 }
 
-int url_unescape(const char *string, size_t length,
-                 char **ostring, size_t *olen)
+int url_unescape_ex(const char *string, size_t length, escape_string *s)
 {
-    size_t alloc = (length?length:strlen(string))+1;
-    char *ns = malloc(alloc);
+    char *ns;
+    size_t alloc;
+
     unsigned char in;
     size_t strindex=0;
     unsigned long hex;
+
+    if (s->data && s->size > 0) {
+        if (s->size < length) {
+            s->data = realloc(s->data, length+4);
+            s->size = length;
+        }
+    } else {
+        s->data = calloc(1, length+4);
+        s->size = length;
+    }
+
+    ns = s->data;
+    alloc = length+1;
+
 
     if(!ns)
         return ENOMEM;
@@ -110,10 +138,7 @@ int url_unescape(const char *string, size_t length,
         string++;
     }
     ns[strindex] = 0;
-
-    if(olen)
-        *olen = strindex;
-    *ostring = ns;
+    s->len = strindex;
 
     return 0;
 }
@@ -124,37 +149,18 @@ int url_unescape(const char *string, size_t length,
 
 #ifdef _TEST
 #include <unistd.h>
-#include <openssl/sha.h>
-#include <json-c/json.h>
-#include "file.h"
+#include "utilfile.h"
+#include "utilsha1.h"
 int main(int argc, char *argv[])
 {
     int fd;
     char name[64], *buf, *out = NULL, *verify;
-    char *p1, *p2;
     size_t len, outlen;
-
-    json_tokener *jtok;
-    json_object *jobj;
-    enum json_tokener_error jerr;
-
     buf = get_file_buffer(argv[1], &len);
-
     if (buf) {
         if (argc > 2) {
             if (url_unescape(buf, len, &out, &outlen) == 0) {
                 printf("%.*s\n", (int)outlen, out);
-                p1 = strchr(out, '=');
-                if (p1) {
-                    p1++;
-                    p2 = strchr(p1, '&');
-                    len = p2 - p1;
-                    jtok = json_tokener_new();
-                    do {
-                        jobj = json_tokener_parse_ex(jtok, p1, len);
-                    } while ((jerr = json_tokener_get_error(jtok)) == json_tokener_continue);
-                    printf("Json:\n%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_PRETTY));
-                }
                 if ((verify = url_escape(out, outlen))) {
                     fd = get_tmpfile(name, 0666, NULL, NULL);
                     if (fd > 0) {

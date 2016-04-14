@@ -50,7 +50,7 @@ static inline char *get_file_buffer(const char *file, size_t *r)
             fprintf(stderr, "failed allocate memory\n");
             break;
         }
-        if ((*r = fread(buf, 1, len, fp)) != len) {
+        if ((*r = fread(buf, 1, len, fp)) != (size_t)len) {
             fprintf(stderr, "file length %ld not equal to read size %zu\n", len, *r);
             free(buf);
             buf = NULL;

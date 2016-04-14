@@ -1,7 +1,7 @@
 prefix=/usr/local
 libdir=$(prefix)/lib
 
-CFLAGS=-g -Wall -fPIC
+CFLAGS=-g -fPIC -W -Wall -Wpointer-arith -Wno-unused-parameter
 LDFLAGS=
 
 VPATH=.
