@@ -76,9 +76,9 @@ static inline char *to_iso_datetime(time_t t, char* datestr)
 
 static inline time_t get_0_clock(time_t time)
 {
-    struct tm ptm = {0};
-    localtime_r(&time,&ptm);
-    return (time - ptm.tm_hour*3600 - ptm.tm_min*60 - ptm.tm_sec);
+  struct tm ptm;
+  localtime_r(&time,&ptm);
+  return (time - ptm.tm_hour*3600 - ptm.tm_min*60 - ptm.tm_sec);
 }
 
 

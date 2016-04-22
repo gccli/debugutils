@@ -29,12 +29,12 @@ $(TARGET):$(OBJS)
 clean:
 	$(RM) -r $(OBJS) $(TARGET)
 
-install:$(TARGET)
-	cp $(shell readlink -f $(TARGET)) $(libdir)
+install:
 	mkdir -p $(prefix)/include/utils
 	@for i in $(HEADERS); do\
 	  [ -f $$i ] && cp $$(readlink -f $$i) $(prefix)/include/utils;\
 	done
+	cp $(shell readlink -f $(TARGET)) $(libdir)
 
 uninstall:
 	$(RM) $(libdir)/$(TARGET)

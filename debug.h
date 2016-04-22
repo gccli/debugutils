@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
 
 #include <sys/syscall.h>
 
@@ -77,6 +78,21 @@ static inline const char *hexstr(void *in, size_t len, char *out)
     out[off] = 0;
 
     return out;
+}
+
+
+static inline void rand_str(char *dest, size_t length)
+{
+    static char charset[] =
+        "0123456789-abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    unsigned int t = time(NULL);
+    size_t i;
+    while (length-- > 0) {
+        i = (double) rand_r(&t) / RAND_MAX * (sizeof(charset) - 1);
+        *dest++ = charset[i];
+    }
+    *dest = '\0';
 }
 
 
