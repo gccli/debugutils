@@ -52,9 +52,9 @@ int nonblockwrite(int fd, char *ptr, int nbytes)
 
     nleft -= nwritten;
     ptr   += nwritten;
-    fprintf(stderr, TCKL"%2c%8d bytes written, %d/%d bytes data sent ", star[inum++%4], nwritten, nbytes-nleft, nbytes);
+    fprintf(stderr, FMT_KL"%2c%8d bytes written, %d/%d bytes data sent ", star[inum++%4], nwritten, nbytes-nleft, nbytes);
   }
-  fprintf(stderr, TCKL);
+  fprintf(stderr, FMT_KL);
 
   set_nonblocking(fd, 0);
 
@@ -113,9 +113,9 @@ int nonblockwrite_ext(int fd, char *ptr, int nbytes, char *errmsg)
 
     nleft -= nwritten;
     ptr   += nwritten;
-    fprintf(stderr, TCKL"%2c%8d bytes written, %d/%d bytes data sent ", star[inum++%4], nwritten, nbytes-nleft, nbytes);
+    fprintf(stderr, FMT_KL"%2c%8d bytes written, %d/%d bytes data sent ", star[inum++%4], nwritten, nbytes-nleft, nbytes);
   }
-  fprintf(stderr, TCKL);
+  fprintf(stderr, FMT_KL);
 
   set_nonblocking(fd, 0);
 
@@ -165,9 +165,9 @@ int readn(int fd, char *ptr, int nbytes)
 
     nleft -= nread;
     ptr   += nread;
-    fprintf(stderr, TCKL"%2c%8d bytes read, %d/%d bytes data received ", star[inum++%4], nread, nbytes-nleft, nbytes);
+    fprintf(stderr, FMT_KL"%2c%8d bytes read, %d/%d bytes data received ", star[inum++%4], nread, nbytes-nleft, nbytes);
   }
-  fprintf(stderr, TCKL);
+  fprintf(stderr, FMT_KL);
 
   return (nbytes - nleft);
 }

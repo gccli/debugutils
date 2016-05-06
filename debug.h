@@ -3,6 +3,7 @@
 
 #include <unistd.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -14,20 +15,48 @@
 #define _DEBUG 0
 #endif
 
-#define FMT_R(msg)  "\x1b[31m\x1b[1m" msg "\x1b[0m\n"
-#define FMT_G(msg)  "\x1b[32m\x1b[1m" msg "\x1b[0m\n"
-#define FMT_B(msg)  "\x1b[34m\x1b[1m" msg "\x1b[0m\n"
-#define FMT_Y(msg)  "\x1b[33m\x1b[1m" msg "\x1b[0m\n"
-#define FMT_M(msg)  "\x1b[35m\x1b[1m" msg "\x1b[0m\n"
-#define TCKL        "\033[0G\033[0K"
+#define MAX_LOG_SIZE    2048
+
+#define FMT_COLOR_R     "\x1b[31m\x1b[1m"
+#define FMT_COLOR_G     "\x1b[32m\x1b[1m"
+#define FMT_COLOR_B     "\x1b[34m\x1b[1m"
+#define FMT_COLOR_Y     "\x1b[33m\x1b[1m"
+#define FMT_COLOR_M     "\x1b[35m\x1b[1m"
+#define FMT_EOL         "\x1b[0m"
+#define FMT_KL          "\033[0G\033[0K"
+
+#define FMT_R(msg)      FMT_COLOR_R msg FMT_EOL
+#define FMT_G(msg)      FMT_COLOR_G msg FMT_EOL
+#define FMT_B(msg)      FMT_COLOR_B msg FMT_EOL
+#define FMT_Y(msg)      FMT_COLOR_Y msg FMT_EOL
+#define FMT_M(msg)      FMT_COLOR_M msg FMT_EOL
+
+
+static inline void
+debug_printf(const char *fn, int line, const char *fmt, ...)
+{
+    va_list ap;
+    char    buffer[MAX_LOG_SIZE];
+    char   *p = buffer;
+
+    p += snprintf(p, MAX_LOG_SIZE, "%s:%d  ", fn, line);
+    va_start(ap, fmt);
+    p += vsnprintf(p, MAX_LOG_SIZE - (p-buffer) - 2, fmt, ap);
+    va_end(ap);
+
+    *p++ = '\n';
+    write(STDOUT_FILENO, buffer, p-buffer);
+}
 
 #if _DEBUG > 0
 #include <assert.h>
 #define __FN__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #define debug_print(msg,...)                                            \
     fprintf(stdout, "%s:%d(%s): "msg,__FN__,__LINE__,__FUNCTION__,##__VA_ARGS__)
+#define debug_puts(...) debug_printf(__FN__,__LINE__, ##__VA_ARGS__)
 #else
 #define debug_print(msg, ...) ((void)0)
+#define debug_puts(...) ((void)0)
 #endif
 
 #define ASSERT(x)                                                       \
