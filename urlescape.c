@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include <errno.h>
-#include "utils/urlescape.h"
+#include "urlescape.h"
 
 #ifdef __cplusplus
 extern "C" {

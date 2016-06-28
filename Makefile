@@ -27,7 +27,7 @@ $(TARGET):$(OBJS)
 	$(CC) $(CFLAGS) -c  $^ -o $@
 
 clean:
-	$(RM) -r $(OBJS) $(TARGET)
+	$(RM) -r $(OBJS) $(TARGET) a.out
 
 install:
 	mkdir -p $(prefix)/include/utils
